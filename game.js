@@ -241,24 +241,52 @@ function renderBoxes() {
     if (assignment) {
       const roleName = assignment[i];
       const rd       = ROLE_DATA[roleName];
-      box.dataset.role = roleName;
-      box.innerHTML = `
-        <div class="box-number">BOX ${i + 1}</div>
-        <div class="box-icon">${rd.icon}</div>
-        <div class="box-role">${roleName}</div>
-        <div class="box-value">৳${rd.value}</div>
-        ${takenBy[i] ? `<div class="box-taken-by">[ ${takenBy[i] === myName ? "YOU" : takenBy[i]} ]</div>` : ""}
-        <div class="box-corner"></div>
-      `;
-      if (isMySelection)     box.classList.add("selected-by-me");
-      else if (takenByOther) box.classList.add("taken");
-      else if (iHaveOther)   box.classList.add("disabled");
-      else box.addEventListener("click", () => selectBox(i, roleName));
+
+      if (isMySelection) {
+        // MY box — show full role, icon, value
+        box.dataset.role = roleName;
+        box.innerHTML = `
+          <div class="box-number">BOX ${i + 1}</div>
+          <div class="box-icon">${rd.icon}</div>
+          <div class="box-role">${roleName}</div>
+          <div class="box-value">৳${rd.value}</div>
+          <div class="box-taken-by">[ YOU ]</div>
+          <div class="box-corner"></div>
+        `;
+        box.classList.add("selected-by-me");
+
+      } else if (takenByOther) {
+        // Taken by someone else — blank, just show their name
+        box.innerHTML = `
+          <div class="box-number">BOX ${i + 1}</div>
+          <div class="box-icon" style="opacity:0.2">🔒</div>
+          <div class="box-role" style="color:var(--muted)">TAKEN</div>
+          <div class="box-taken-by">[ ${takenBy[i]} ]</div>
+          <div class="box-corner"></div>
+        `;
+        box.classList.add("taken");
+
+      } else if (iHaveOther) {
+        // I already picked a different box — lock these blank
+        box.innerHTML = `
+          <div class="box-number">BOX ${i + 1}</div>
+          <div class="box-corner"></div>
+        `;
+        box.classList.add("disabled");
+
+      } else {
+        // Available to pick — blank, no role shown
+        box.innerHTML = `
+          <div class="box-number">BOX ${i + 1}</div>
+          <div class="box-corner"></div>
+        `;
+        box.addEventListener("click", () => selectBox(i, roleName));
+      }
+
     } else {
+      // Not shuffled yet — blank locked boxes
       box.innerHTML = `
         <div class="box-number">BOX ${i + 1}</div>
-        <div class="box-icon" style="opacity:0.3">❓</div>
-        <div class="box-role" style="color:var(--muted)">???</div>
         <div class="box-corner"></div>
       `;
       box.classList.add("disabled");
