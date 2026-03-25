@@ -154,24 +154,68 @@ function joinExistingRoom(errEl) {
       errEl.textContent = "Room not found. Check the code and try again.";
       return;
     }
+
+    const players    = existing.players || {};
+    const maxPlayers = existing.playerCount || 4;
+
+    // Allow if already in the room (rejoin), block if room is full
+    if (!players[myName] && Object.keys(players).length >= maxPlayers) {
+      errEl.textContent = `Room is full! (${maxPlayers}/${maxPlayers} players)`;
+      return;
+    }
+
     gameRef = ref;
-    const players = existing.players || {};
     if (!players[myName]) {
       gameRef.child("players/" + myName).set({
         joined: true, selection: null, shuffleVote: false, reshuffleVote: false, isHost: false
       });
     }
-    // Sync player count from room
     if (existing.playerCount) playerCount = existing.playerCount;
     startListening();
     showGameScreen();
   });
 }
 
+// ── SESSION RESTORE ON REFRESH ────────────────────────────────
+(function restoreSession() {
+  const raw = localStorage.getItem("cp_session");
+  if (!raw) return;
+  try {
+    const s = JSON.parse(raw);
+    if (!s.myName || !s.roomId) return;
+
+    myName      = s.myName;
+    roomId      = s.roomId;
+    playerCount = s.playerCount || 5;
+
+    // Check the room still exists before restoring
+    const ref = db.ref("rooms/" + roomId);
+    ref.once("value", snap => {
+      const existing = snap.val();
+      if (!existing) {
+        // Room gone — clear session and stay on landing
+        localStorage.removeItem("cp_session");
+        return;
+      }
+      // Room exists — go straight back in
+      gameRef = ref;
+      if (existing.playerCount) playerCount = existing.playerCount;
+      document.getElementById("room-display").textContent   = roomId;
+      document.getElementById("player-display").textContent = myName;
+      showScreen("game");
+      startListening();
+    });
+  } catch(e) {
+    localStorage.removeItem("cp_session");
+  }
+})();
+
 // ── GAME SCREEN INIT ──────────────────────────────────────────
 function showGameScreen() {
   document.getElementById("room-display").textContent   = roomId;
   document.getElementById("player-display").textContent = myName;
+  // Save session so refresh returns to game
+  localStorage.setItem("cp_session", JSON.stringify({ myName, roomId, playerCount }));
   showScreen("game");
 }
 
@@ -353,6 +397,17 @@ function renderStatus() {
       : `All players have chosen! 🎉`;
   }
 }
+
+// ── LEAVE ROOM ────────────────────────────────────────────────
+document.getElementById("leave-btn").addEventListener("click", () => {
+  if (!confirm("Leave the room? You can rejoin with the same code and name.")) return;
+  localStorage.removeItem("cp_session");
+  if (gameRef) gameRef.off(); // stop listening
+  gameRef = null;
+  gameState = null;
+  myName = ""; roomId = "";
+  showScreen("landing");
+});
 
 // ── SHUFFLE ───────────────────────────────────────────────────
 document.getElementById("shuffle-btn").addEventListener("click", () => {

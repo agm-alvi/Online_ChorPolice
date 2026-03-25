@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <!-- LANDING SCREEN -->
+  <!-- LANDING -->
   <div id="landing-screen" class="screen active">
     <div class="scanlines"></div>
     <div class="landing-container">
@@ -24,19 +24,23 @@
       <div class="landing-btns">
         <button class="landing-btn create-landing-btn" id="go-create">
           <span class="lb-icon">＋</span>
-          <span class="lb-label">CREATE ROOM</span>
-          <span class="lb-desc">Start a new game as host</span>
+          <div>
+            <span class="lb-label">CREATE ROOM</span>
+            <span class="lb-desc">Start a new game as host</span>
+          </div>
         </button>
         <button class="landing-btn join-landing-btn" id="go-join">
           <span class="lb-icon">⤵</span>
-          <span class="lb-label">JOIN ROOM</span>
-          <span class="lb-desc">Enter with a room code</span>
+          <div>
+            <span class="lb-label">JOIN ROOM</span>
+            <span class="lb-desc">Enter with a room code</span>
+          </div>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- CREATE ROOM SCREEN -->
+  <!-- CREATE ROOM -->
   <div id="create-screen" class="screen">
     <div class="scanlines"></div>
     <div class="setup-container">
@@ -64,13 +68,14 @@
         </div>
         <button class="refresh-code-btn" id="refresh-code" title="New code">⟳</button>
       </div>
-      <p class="note">Share this code with other players once you're inside.</p>
+      <p class="note">Share this code with others once you're inside.</p>
 
       <button id="create-btn" class="primary-btn">START GAME</button>
+      <p id="create-error" class="error-msg"></p>
     </div>
   </div>
 
-  <!-- JOIN ROOM SCREEN -->
+  <!-- JOIN ROOM -->
   <div id="join-screen" class="screen">
     <div class="scanlines"></div>
     <div class="setup-container">
@@ -79,7 +84,7 @@
 
       <div class="form-group">
         <label for="join-room-input">ROOM CODE</label>
-        <input type="text" id="join-room-input" placeholder="e.g. WOLF-42" maxlength="12" autocomplete="off" />
+        <input type="text" id="join-room-input" placeholder="e.g. WOLF42" maxlength="10" autocomplete="off" />
       </div>
 
       <div class="form-group">
@@ -92,7 +97,7 @@
     </div>
   </div>
 
-  <!-- GAME SCREEN -->
+  <!-- GAME -->
   <div id="game-screen" class="screen">
     <div class="scanlines"></div>
 
@@ -101,11 +106,14 @@
         <div class="game-logo-small">ChorPolice</div>
         <div class="room-tag">ROOM: <span id="room-display"></span></div>
       </div>
-      <div class="player-tag">YOU: <span id="player-display"></span></div>
+      <div class="header-right">
+        <div class="player-tag">YOU: <span id="player-display"></span></div>
+        <button id="leave-btn" title="Leave Room">✕ LEAVE</button>
+      </div>
     </header>
 
     <div class="status-bar">
-      <div id="status-msg">Waiting for players...</div>
+      <div id="status-msg">Loading...</div>
     </div>
 
     <div class="players-panel">
@@ -127,7 +135,6 @@
     <div id="shuffle-votes" class="vote-tracker"></div>
   </div>
 
-  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script src="game.js"></script>
